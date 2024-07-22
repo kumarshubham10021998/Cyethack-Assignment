@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Chip, TextField, Button, Tabs, Tab, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, useMediaQuery
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Chip, TextField, Button, Tabs, Tab, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, useMediaQuery, Menu, MenuItem, IconButton
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
-import { addProfile } from '../redux/actions/itemActions';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { addProfile, deleteProfile, setItems, updateProfile } from '../redux/actions/itemActions';
+import data from '../data'; // Import the data from data.js
 
 const Dashboard = () => {
   const items = useSelector((state) => state.items.items);
@@ -15,6 +17,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [tabValue, setTabValue] = useState('all');
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [newProfile, setNewProfile] = useState({
     scanName: '',
     targetURL: '',
@@ -25,7 +28,14 @@ const Dashboard = () => {
     severity: ''
   });
   const [errors, setErrors] = useState({});
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
   const isMobile = useMediaQuery('(max-width:600px)');
+
+  useEffect(() => {
+    // Initialize items from data.js when the component mounts
+    dispatch(setItems(data));
+  }, [dispatch]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -41,6 +51,7 @@ const Dashboard = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setEditOpen(false);
   };
 
   const handleChange = (e) => {
@@ -79,8 +90,50 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditOpen = () => {
+    setEditOpen(true);
+    setOpen(false); // Close the add dialog
+  };
+
+  const handleEdit = () => {
+    if (validateForm()) {
+      const severityArray = newProfile.severity.split(',').map((sev) => parseInt(sev.trim(), 10));
+      const updatedProfile = { ...newProfile, severity: severityArray };
+      dispatch(updateProfile(selectedRow.id, updatedProfile)); // Pass the row ID to update
+      handleClose();
+      setNewProfile({
+        scanName: '',
+        targetURL: '',
+        scanEngine: '',
+        status: '',
+        rank: '',
+        totalVulnerabilities: '',
+        severity: ''
+      });
+      setErrors({});
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedRow) {
+      dispatch(deleteProfile(selectedRow.id)); // Pass the row ID to delete
+    }
+    handleClose();
+  };
+
   const handleRowClick = (row) => {
     navigate(`/details/${row.scanName}`, { state: { profile: row } });
+  };
+
+  const handleMenuOpen = (event, row) => {
+    event.stopPropagation(); // Prevent row click from triggering
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(row);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRow(null);
   };
 
   const filteredData = items
@@ -142,17 +195,14 @@ const Dashboard = () => {
               <TableCell>Rank</TableCell>
               <TableCell>Total Vulnerabilities</TableCell>
               <TableCell>Severity</TableCell>
+              <TableCell>More</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredData.map((row, index) => (
               <TableRow key={index} onClick={() => handleRowClick(row)} style={{ cursor: 'pointer' }}>
                 <TableCell>{row.scanName}</TableCell>
-                <TableCell>
-                  <a href={row.targetURL} target="_blank" rel="noopener noreferrer">
-                    {row.targetURL}
-                  </a>
-                </TableCell>
+                <TableCell>{row.targetURL}</TableCell>
                 <TableCell>{row.scanEngine}</TableCell>
                 <TableCell>{row.status}</TableCell>
                 <TableCell>{row.rank}</TableCell>
@@ -171,11 +221,25 @@ const Dashboard = () => {
                     ))}
                   </Box>
                 </TableCell>
+                <TableCell>
+                  <IconButton onClick={(e) => handleMenuOpen(e, row)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEditOpen}>Edit</MenuItem>
+        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+      </Menu>
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add New Profile</DialogTitle>
@@ -253,7 +317,7 @@ const Dashboard = () => {
           <TextField
             margin="dense"
             name="severity"
-            label="Severity (comma-separated)"
+            label="Severity (comma separated)"
             type="text"
             fullWidth
             value={newProfile.severity}
@@ -267,7 +331,102 @@ const Dashboard = () => {
             Cancel
           </Button>
           <Button onClick={handleSubmit} color="primary">
-            Add
+            Add Profile
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editOpen} onClose={handleClose}>
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Update the details of the selected profile.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="scanName"
+            label="Scan Name"
+            type="text"
+            fullWidth
+            value={newProfile.scanName}
+            onChange={handleChange}
+            error={!!errors.scanName}
+            helperText={errors.scanName}
+          />
+          <TextField
+            margin="dense"
+            name="targetURL"
+            label="Target URL"
+            type="text"
+            fullWidth
+            value={newProfile.targetURL}
+            onChange={handleChange}
+            error={!!errors.targetURL}
+            helperText={errors.targetURL}
+          />
+          <TextField
+            margin="dense"
+            name="scanEngine"
+            label="Scan Engine"
+            type="text"
+            fullWidth
+            value={newProfile.scanEngine}
+            onChange={handleChange}
+            error={!!errors.scanEngine}
+            helperText={errors.scanEngine}
+          />
+          <TextField
+            margin="dense"
+            name="status"
+            label="Status"
+            type="text"
+            fullWidth
+            value={newProfile.status}
+            onChange={handleChange}
+            error={!!errors.status}
+            helperText={errors.status}
+          />
+          <TextField
+            margin="dense"
+            name="rank"
+            label="Rank"
+            type="text"
+            fullWidth
+            value={newProfile.rank}
+            onChange={handleChange}
+            error={!!errors.rank}
+            helperText={errors.rank}
+          />
+          <TextField
+            margin="dense"
+            name="totalVulnerabilities"
+            label="Total Vulnerabilities"
+            type="text"
+            fullWidth
+            value={newProfile.totalVulnerabilities}
+            onChange={handleChange}
+            error={!!errors.totalVulnerabilities}
+            helperText={errors.totalVulnerabilities}
+          />
+          <TextField
+            margin="dense"
+            name="severity"
+            label="Severity (comma separated)"
+            type="text"
+            fullWidth
+            value={newProfile.severity}
+            onChange={handleChange}
+            error={!!errors.severity}
+            helperText={errors.severity}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleEdit} color="primary">
+            Save Changes
           </Button>
         </DialogActions>
       </Dialog>
