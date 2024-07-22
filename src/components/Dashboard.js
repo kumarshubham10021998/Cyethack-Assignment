@@ -5,10 +5,10 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
-import data from '../data';
 import { addProfile } from '../redux/actions/itemActions';
 
 const Dashboard = () => {
+  const items = useSelector((state) => state.items.items);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -83,7 +83,7 @@ const Dashboard = () => {
     navigate(`/details/${row.scanName}`, { state: { profile: row } });
   };
 
-  const filteredData = data
+  const filteredData = items
     .filter((row) => {
       if (tabValue === 'all') return true;
       if (tabValue === 'scheduled') return row.status.toLowerCase() === 'scheduled';
@@ -93,6 +93,15 @@ const Dashboard = () => {
     .filter((row) =>
       row.scanName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 1: return '#ff0000'; // High severity - Red
+      case 2: return '#ff9900'; // Medium severity - Orange
+      case 3: return '#ffff00'; // Low severity - Yellow
+      default: return '#00ff00'; // Default/Unknown severity - Green
+    }
+  };
 
   return (
     <Box sx={{ p: 2 }}>
@@ -244,7 +253,7 @@ const Dashboard = () => {
           <TextField
             margin="dense"
             name="severity"
-            label="Severity (comma separated)"
+            label="Severity (comma-separated)"
             type="text"
             fullWidth
             value={newProfile.severity}
@@ -264,13 +273,6 @@ const Dashboard = () => {
       </Dialog>
     </Box>
   );
-};
-
-const getSeverityColor = (severity) => {
-  if (severity > 90) return '#ff0000';
-  if (severity > 70) return '#ff9900';
-  if (severity > 50) return '#ffcc00';
-  return '#33cc33';
 };
 
 export default Dashboard;
