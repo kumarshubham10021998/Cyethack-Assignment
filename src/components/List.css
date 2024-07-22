@@ -1,0 +1,63 @@
+.container {
+    padding: 20px;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .severity {
+    display: flex;
+    /* gap: 5px; */
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1.7;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    /* border-radius: 0.25rem; */
+  }
+  
+  .badge-success {
+    background-color: #28a745;
+  }
+  
+  .badge-warning {
+    background-color: #ffc107;
+  }
+  
+  .badge-danger {
+    background-color: #dc3545;
+  }
+  
+  .badge-secondary {
+    background-color: #6c757d;
+  }
+  
