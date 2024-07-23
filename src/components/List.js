@@ -11,14 +11,17 @@ const List = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Dispatch action to set items from dataItems
     dispatch(setItems(dataItems));
   }, [dispatch]);
 
   const handleClick = (item) => {
     dispatch(setSelectedItem(item));
     sessionStorage.setItem('selectedItem', JSON.stringify(item));
-    navigate('/details');
+    navigate('/details', { state: { profile: item } });
+  };
+
+  const handleAnchorClick = (e) => {
+    e.stopPropagation(); // Prevent the click event from bubbling up to the row
   };
 
   return (
@@ -42,7 +45,12 @@ const List = () => {
               <tr key={item.scanName} onClick={() => handleClick(item)}>
                 <td>{item.scanName}</td>
                 <td>
-                  <a href={item.targetUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={item.targetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleAnchorClick}
+                  >
                     {item.targetUrl}
                   </a>
                 </td>

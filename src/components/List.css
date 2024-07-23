@@ -61,3 +61,12 @@
     background-color: #6c757d;
   }
   
+  /* List.css */
+
+.table a {
+  cursor: pointer; /* Changes cursor to a pointer */
+}
+
+.table a:hover {
+  color: blue; /* Optional: Change color on hover */
+}

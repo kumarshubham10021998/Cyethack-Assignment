@@ -11,6 +11,7 @@ import Sidebar from './components/Sidebar';
 import Login from './components/Login';
 import { getUser } from './utils/auth';
 import './App.css';
+import Detail from './components/Detail';
 
 
 const store = createStore(rootReducer);
@@ -61,6 +62,7 @@ function App() {
                     <Route path="/list" element={<ProtectedRoute element={<List />} />} />
                     {/* <Route path="/list/details" element={<ProtectedRoute element={<Details />} />} /> */}
                     <Route path="/details/:scanName" element={<Details />} />
+                    <Route path="/details" element={<Detail />} />
                   </Routes>
                 </main>
               </div>

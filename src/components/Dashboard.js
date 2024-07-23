@@ -25,7 +25,7 @@ const Dashboard = () => {
     status: '',
     rank: '',
     totalVulnerabilities: '',
-    severity: ''
+    severity: []
   });
   const [errors, setErrors] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
@@ -66,7 +66,7 @@ const Dashboard = () => {
     if (!newProfile.status) newErrors.status = 'Status is required';
     if (!newProfile.rank) newErrors.rank = 'Rank is required';
     if (!newProfile.totalVulnerabilities) newErrors.totalVulnerabilities = 'Total Vulnerabilities is required';
-    if (!newProfile.severity) newErrors.severity = 'Severity is required';
+    if (!newProfile.severity.length) newErrors.severity = 'Severity is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,7 +84,7 @@ const Dashboard = () => {
         status: '',
         rank: '',
         totalVulnerabilities: '',
-        severity: ''
+        severity: []
       });
       setErrors({});
     }
@@ -108,7 +108,7 @@ const Dashboard = () => {
         status: '',
         rank: '',
         totalVulnerabilities: '',
-        severity: ''
+        severity: []
       });
       setErrors({});
     }
@@ -209,7 +209,7 @@ const Dashboard = () => {
                 <TableCell>{row.totalVulnerabilities}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', flexWrap: 'nowrap' }}>
-                    {row.severity.map((severity, i) => (
+                    {Array.isArray(row.severity) && row.severity.map((severity, i) => (
                       <Chip
                         key={i}
                         label={severity}
@@ -320,7 +320,7 @@ const Dashboard = () => {
             label="Severity (comma separated)"
             type="text"
             fullWidth
-            value={newProfile.severity}
+            value={newProfile.severity.join(', ')}
             onChange={handleChange}
             error={!!errors.severity}
             helperText={errors.severity}
@@ -415,7 +415,7 @@ const Dashboard = () => {
             label="Severity (comma separated)"
             type="text"
             fullWidth
-            value={newProfile.severity}
+            value={newProfile.severity.join(', ')}
             onChange={handleChange}
             error={!!errors.severity}
             helperText={errors.severity}
