@@ -13,7 +13,6 @@ import { getUser } from './utils/auth';
 import './App.css';
 import Detail from './components/Detail';
 
-
 const store = createStore(rootReducer);
 
 const ProtectedRoute = ({ element }) => {
@@ -33,10 +32,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={<Navigate to="/dashboard" />}
-          />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route
             path="*"
             element={
@@ -60,7 +56,6 @@ function App() {
                   <Routes>
                     <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
                     <Route path="/list" element={<ProtectedRoute element={<List />} />} />
-                    {/* <Route path="/list/details" element={<ProtectedRoute element={<Details />} />} /> */}
                     <Route path="/details/:scanName" element={<Details />} />
                     <Route path="/details" element={<Detail />} />
                   </Routes>
